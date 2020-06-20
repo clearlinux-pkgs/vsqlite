@@ -4,13 +4,14 @@
 #
 Name     : vsqlite
 Version  : 0.3.13
-Release  : 7
+Release  : 8
 URL      : https://github.com/vinzenz/vsqlite--/archive/0.3.13.tar.gz
 Source0  : https://github.com/vinzenz/vsqlite--/archive/0.3.13.tar.gz
 Summary  : No detailed summary available
 Group    : Development/Tools
 License  : BSD-3-Clause
-Requires: vsqlite-lib
+Requires: vsqlite-lib = %{version}-%{release}
+Requires: vsqlite-license = %{version}-%{release}
 BuildRequires : boost-dev
 BuildRequires : sqlite-autoconf-dev
 
@@ -20,8 +21,9 @@ A welldesigned and portable SQLite3 Wrapper for C++
 %package dev
 Summary: dev components for the vsqlite package.
 Group: Development
-Requires: vsqlite-lib
-Provides: vsqlite-devel
+Requires: vsqlite-lib = %{version}-%{release}
+Provides: vsqlite-devel = %{version}-%{release}
+Requires: vsqlite = %{version}-%{release}
 
 %description dev
 dev components for the vsqlite package.
@@ -30,33 +32,53 @@ dev components for the vsqlite package.
 %package lib
 Summary: lib components for the vsqlite package.
 Group: Libraries
+Requires: vsqlite-license = %{version}-%{release}
 
 %description lib
 lib components for the vsqlite package.
 
 
+%package license
+Summary: license components for the vsqlite package.
+Group: Default
+
+%description license
+license components for the vsqlite package.
+
+
 %prep
 %setup -q -n vsqlite---0.3.13
+cd %{_builddir}/vsqlite---0.3.13
 
 %build
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
-export LANG=C
-export SOURCE_DATE_EPOCH=1516408435
+export LANG=C.UTF-8
+export SOURCE_DATE_EPOCH=1592662959
+export GCC_IGNORE_WERROR=1
+export AR=gcc-ar
+export RANLIB=gcc-ranlib
+export NM=gcc-nm
+export CFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto=4 "
+export FCFLAGS="$FFLAGS -O3 -ffat-lto-objects -flto=4 "
+export FFLAGS="$FFLAGS -O3 -ffat-lto-objects -flto=4 "
+export CXXFLAGS="$CXXFLAGS -O3 -ffat-lto-objects -flto=4 "
 %autogen --disable-static
 make  %{?_smp_mflags}
 
 %check
-export LANG=C
+export LANG=C.UTF-8
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 make VERBOSE=1 V=1 %{?_smp_mflags} check
 
 %install
-export SOURCE_DATE_EPOCH=1516408435
+export SOURCE_DATE_EPOCH=1592662959
 rm -rf %{buildroot}
+mkdir -p %{buildroot}/usr/share/package-licenses/vsqlite
+cp %{_builddir}/vsqlite---0.3.13/COPYING %{buildroot}/usr/share/package-licenses/vsqlite/63ab51f7aebccc8ea5ea57d818793307d5d5ff15
 %make_install
 
 %files
@@ -79,3 +101,7 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 /usr/lib64/libvsqlitepp.so.3
 /usr/lib64/libvsqlitepp.so.3.0.0
+
+%files license
+%defattr(0644,root,root,0755)
+/usr/share/package-licenses/vsqlite/63ab51f7aebccc8ea5ea57d818793307d5d5ff15
